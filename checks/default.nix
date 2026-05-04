@@ -32,6 +32,8 @@ builtins.listToAttrs (
         driver = pkgs.testers.runNixOSTest (
           lib.recursiveUpdate {
             defaults = {
+              virtualisation.memorySize = 2048;
+
               imports = [
                 (nixpkgs + "/nixos/modules/profiles/minimal.nix")
                 (nixpkgs + "/nixos/modules/profiles/perlless.nix")

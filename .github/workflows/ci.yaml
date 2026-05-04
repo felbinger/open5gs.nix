@@ -73,7 +73,7 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Check flake
-        run: nix -L flake check --no-build
+        run: NIXPKGS_ALLOW_UNFREE=1 nix -L flake check --impure --no-build
 
   test:
     name: "nix build .#${{ matrix.name }}"
@@ -99,4 +99,4 @@ jobs:
       - uses: actions/checkout@v6
 
       - name: Run integration test
-        run: nix -L build .#checks.x86_64-linux.${{ matrix.name }}
+        run: NIXPKGS_ALLOW_UNFREE=1 nix -L build --impure .#checks.x86_64-linux.${{ matrix.name }}
