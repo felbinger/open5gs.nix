@@ -30,6 +30,86 @@ in
         logger
         global
         ;
+
+      bsf = mkOption {
+        type = types.submodule {
+          freeformType = yaml.type;
+          options = {
+            sbi = mkOption {
+              type = types.nullOr (
+                types.submodule {
+                  freeformType = yaml.type;
+                  options = {
+                    server = mkOption {
+                      type = types.nullOr (
+                        types.listOf (
+                          types.submodule {
+                            freeformType = yaml.type;
+                            options = {
+                              address = mkOption {
+                                type = types.str;
+                                default = "127.0.0.15";
+                              };
+                              port = mkOption {
+                                type = types.int;
+                                default = 7777;
+                              };
+                            };
+                          }
+                        )
+                      );
+                      default = [ { } ];
+                    };
+                    client = mkOption {
+                      type = types.nullOr (
+                        types.submodule {
+                          freeformType = yaml.type;
+                          options = {
+                            nrf = mkOption {
+                              type = types.nullOr (
+                                types.listOf (
+                                  types.submodule {
+                                    freeformType = yaml.type;
+                                    options = {
+                                      uri = mkOption {
+                                        type = types.str;
+                                        default = "http://127.0.0.10:7777";
+                                      };
+                                    };
+                                  }
+                                )
+                              );
+                            };
+                            scp = mkOption {
+                              type = types.nullOr (
+                                types.listOf (
+                                  types.submodule {
+                                    freeformType = yaml.type;
+                                    options = {
+                                      uri = mkOption {
+                                        type = types.str;
+                                        default = "http://127.0.0.200:7777";
+                                      };
+                                    };
+                                  }
+                                )
+                              );
+                              default = [ { } ];
+                            };
+                          };
+                        }
+                      );
+                      default = { };
+                    };
+                  };
+                }
+              );
+              default = { };
+            };
+          };
+        };
+        default = { };
+      };
     };
   };
 

@@ -173,7 +173,7 @@
   };
 
   testScript =
-    { nodes, ... }:
+    { ... }:
     /* python */ ''
       with subtest("ensure mongodb open5gs database is configured"):
         machine.wait_for_unit("mongodb.service")
