@@ -47,9 +47,9 @@
                 };
               }
             ];
-            title = "Module Search of felbinger/Open5GS.nix";
+            title = "Module Search of rat.nix/Open5GS.nix";
             baseHref = "/open5gs.nix/";
-            urlPrefix = "https://github.com/felbinger/open5gs.nix/blob/main/";
+            urlPrefix = "https://github.com/rat-nix/open5gs.nix/blob/main/";
           };
         }
       );
