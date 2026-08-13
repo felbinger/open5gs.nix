@@ -13,6 +13,8 @@ let
     mkIf
     mkOption
     types
+    getExe
+    getExe'
     ;
   components = [
     "amf" # 5G Access and Mobility Management Function
@@ -41,6 +43,11 @@ in
     enable = mkEnableOption "Open5GS";
 
     package = mkPackageOption pkgs "open5gs" { };
+
+    webui = mkOption {
+      type = types.submodule (import ./webui.nix { inherit config lib pkgs; });
+      default = { };
+    };
   }
   // (builtins.listToAttrs (
     map (v: {
@@ -100,27 +107,52 @@ in
         mode = "0700";
       };
 
-      services = builtins.listToAttrs (
-        map (v: {
-          name = "open5gs-${v}d";
-          value = {
-            description = "Open5GS ${v} Daemon";
+      services =
+        builtins.listToAttrs (
+          map (v: {
+            name = "open5gs-${v}d";
+            value = {
+              description = "Open5GS ${v} Daemon";
+              after = [ "network-online.target" ];
+              wants = [ "network-online.target" ];
+              wantedBy = [ "multi-user.target" ];
+              serviceConfig = {
+                # TODO upf requires elevated privileges to create tunnel device, maybe with recursive update for this single service?
+                #User = "open5gs";
+                #Group = "open5gs";
+                ExecStart = "${getExe' cfg.package "open5gs-${v}d"} -c ${cfg."${v}".configFile}";
+                ExecReload = "${getExe' pkgs.busybox "kill"} -HUP $MAINPID";
+                Restart = "always";
+                RestartSec = 2;
+                RestartPreventExitStatus = 1;
+              };
+            };
+          }) (builtins.filter (v: cfg.${v}.enable) components)
+        )
+        // {
+          # TODO cannot open .env .env
+          open5gs-webui = mkIf cfg.webui.enable {
+            description = "Open5GS WebUI";
             after = [ "network-online.target" ];
-            wants = [ "network-online.target" ];
+            wants = [
+              "mongodb.service"
+              "mongod.service"
+            ];
             wantedBy = [ "multi-user.target" ];
+            environment.NODE_ENV = "production";
             serviceConfig = {
-              # TODO upf requires elevated privileges to create tunnel device, maybe with recursive update for this single service?
-              #User = "open5gs";
-              #Group = "open5gs";
-              ExecStart = "${lib.getExe' cfg.package "open5gs-${v}d"} -c ${cfg."${v}".configFile}";
-              ExecReload = "${lib.getExe' pkgs.busybox "kill"} -HUP $MAINPID";
+              Type = "simple";
+
+              User = "open5gs";
+              Group = "open5gs";
+
+              WorkingDirectory = "${cfg.webui.package}/lib/node_modules/open5gs";
+              ExecStart = "${getExe pkgs.nodejs} server/index.js";
               Restart = "always";
               RestartSec = 2;
-              RestartPreventExitStatus = 1;
             };
           };
-        }) (builtins.filter (v: cfg.${v}.enable) components)
-      );
+        };
     };
   };
 }
