@@ -1,11 +1,9 @@
 {
-  config,
   lib,
   pkgs,
   ...
 }:
 let
-  cfg = config.services.open5gs.webui;
   inherit (lib) mkEnableOption mkPackageOption;
 in
 {
